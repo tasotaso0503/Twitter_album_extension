@@ -1,0 +1,7 @@
+Twitter_album_extension/backend/
+の階層で、
+source .venv/bin/activate
+で venv仮想環境を有効化
+
+deactivate
+で仮想環境を無効化
