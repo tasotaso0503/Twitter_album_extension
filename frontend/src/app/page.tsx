@@ -8,8 +8,6 @@ type data = {
 
 export default function Home() {
   const [data, setData] = useState("")
-
-
   const backend_url = process.env.NEXT_PUBLIC_BACKEND_API_URL
   useEffect(() => {
       const get_data = async () => {

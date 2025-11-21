@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Twitter Bookmark Manager",
+    "version": "1.0",
+    "description": "Twitterのツイートを保存・管理する拡張機能",
+    "permissions": [
+      "storage",
+      "activeTab"
+    ],
+    "content_scripts": [
+      {
+        "matches": [
+          "https://x.com/*"
+        ],
+        "js": ["dist/content.js"],
+        "run_at": "document_idle"
+      }
+    ]
+}
