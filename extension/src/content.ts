@@ -10,16 +10,52 @@ function isPostDetailPage(): boolean {
   return window.location.pathname.includes("/status/");
 }
 
-async function api(): Promise<boolean> {
-  const response = await fetch("http://localhost:8080/api/health")
-  if (!response.ok) {
-    console.log("エラーが発生しました")
-    return false
-  }
+// ツイート情報を抽出する関数
+function extractTweetData() {
+  // ツイート全体を囲む要素を取得
+  const article = document.querySelector('article[data-testid="tweet"]');
+  if (!article) return null;
 
-  const data = await response.json()
-  console.log(data)
-  return true
+  // 1. 投稿者の名前
+  // data-testid="User-Name" の中には名前、ID(@xxx)、バッジなどが含まれます。
+  const userNameElement = article.querySelector('div[data-testid="User-Name"]');
+  const rawAuthorName = userNameElement?.textContent || "不明";
+  const authorName = rawAuthorName.split('@')[0].trim();
+
+  // 2. ツイート内容
+  const textElement = article.querySelector('div[data-testid="tweetText"]');
+  const postContent = textElement?.textContent || "";
+
+  // 3. 投稿日時
+  // timeタグの datetime 属性に ISO形式の日付が入っています
+  const timeElement = article.querySelector('time');
+  const postedAt = timeElement?.getAttribute('datetime') || "";
+
+  // 4. ツイートのURL
+  const postUrl = window.location.href;
+
+  return {
+    authorName,
+    postContent,
+    postedAt,
+    postUrl
+  };
+}
+
+async function api(): Promise<boolean> {
+  try {
+    const response = await fetch("http://localhost:8080/api/health");
+    if (!response.ok) {
+      console.log("エラーが発生しました");
+      return false;
+    }
+    const data = await response.json();
+    console.log("API Response:", data);
+    return true;
+  } catch (error) {
+    console.error("API Request Error:", error);
+    return false;
+  }
 }
 
 // MutationObserverを使って「画面の変化」を監視する
@@ -47,12 +83,20 @@ const observer = new MutationObserver(async (mutations: MutationRecord[]) => {
 
   // post が存在する時だけログを出力する。
   if (post.length > 0) {
+    // フラグをリセット
     hasLogged = true;
     console.log("✅ 今、ツイート詳細ページを見ています！");
     console.log(`現在のURL: ${window.location.href}`);
 
+    // データを抽出してコンソールに出力
+    const tweetData = extractTweetData();
+    if (tweetData) {
+        console.log("📊 取得したツイートデータ:", tweetData);
+    } else {
+        console.warn("⚠️ ツイートデータの取得に失敗しました");
+    }
+
     const response = await api()
-    // そのページで処理をしたらフラグをリセット
   }
 });
 
